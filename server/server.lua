@@ -1,23 +1,34 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
--- Check if the user is police (grade >= 4) or an admin group
-function hasLicensePermission(source)
+-- Check if the user has permission for a specific licenseType
+function hasLicensePermission(source, licenseType)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return false end
 
-    local job = Player.PlayerData.job
-    local isPolice = job.name == "police" and job.grade.level >= 4
-    local isAdmin = QBCore.Functions.HasPermission(source, "admin")
+    -- Admins can manage any license
+    if QBCore.Functions.HasPermission(source, "admin") then
+        return true
+    end
 
-    return isPolice or isAdmin
+    local job = Player.PlayerData.job
+    local allowedJobs = Config.LicensePermissions[licenseType]
+    if not allowedJobs then return false end
+
+    for _, jobConfig in pairs(allowedJobs) do
+        if job.name == jobConfig.name and job.grade.level >= jobConfig.minGrade then
+            return true
+        end
+    end
+
+    return false
 end
 
 RegisterNetEvent('rps_licensemanager:updateLicense', function(targetId, licenseType, action)
     local src = source
-    if not hasLicensePermission(src) then
+    if not hasLicensePermission(src, licenseType) then
         TriggerClientEvent('ox_lib:notify', src, {
             title = 'rps License Manager',
-            description = 'You do not have permission to use this.',
+            description = 'You do not have permission to manage this license.',
             type = 'error'
         })
         return
@@ -51,17 +62,33 @@ RegisterNetEvent('rps_licensemanager:updateLicense', function(targetId, licenseT
 end)
 
 lib.callback.register('rps_licensemanager:canUseCommand', function(source)
-    return hasLicensePermission(source)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player then return false end
+
+    -- Admin override
+    if QBCore.Functions.HasPermission(source, "admin") then
+        return true
+    end
+
+    local job = Player.PlayerData.job
+    for licenseType, jobs in pairs(Config.LicensePermissions) do
+        for _, jobConfig in pairs(jobs) do
+            if job.name == jobConfig.name and job.grade.level >= jobConfig.minGrade then
+                return true
+            end
+        end
+    end
+
+    return false
 end)
 
--- Send the license types to the client
+-- Send license types to the UI
 RegisterNetEvent('rps_licensemanager:getLicenseTypes', function()
-    local licenseTypes = Config.LicenseTypes  -- Get the license types from the config
+    local licenseTypes = Config.LicenseTypes
     TriggerClientEvent('rps_licensemanager:setLicenseTypes', source, licenseTypes)
 end)
 
--- Trigger the event when the client opens the UI (via command or other methods)
+-- Trigger the license manager UI via command
 RegisterCommand("managelicense", function(source)
-    -- Send license types to the player when they use the command
     TriggerEvent('rps_licensemanager:getLicenseTypes')
 end)

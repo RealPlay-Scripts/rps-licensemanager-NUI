@@ -1,13 +1,10 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+-- Register the /managelicense command
 RegisterCommand("managelicense", function()
     lib.callback('rps_licensemanager:canUseCommand', false, function(allowed)
         if allowed then
-            SetNuiFocus(true, true)
-            SendNUIMessage({ action = "openUI" })
-
-            -- Request license types from the server to populate the form
-            TriggerServerEvent('rps_licensemanager:getLicenseTypes')
+            TriggerEvent("rps_licensemanager:openUI")
         else
             lib.notify({
                 title = "rps License Manager",
@@ -18,19 +15,21 @@ RegisterCommand("managelicense", function()
     end)
 end)
 
+-- Open the NUI
 RegisterNetEvent("rps_licensemanager:openUI", function()
     SetNuiFocus(true, true)
     SendNUIMessage({ action = "openUI" })
-
-    -- Request license types from the server to populate the form
+    -- Get license types dynamically from server
     TriggerServerEvent('rps_licensemanager:getLicenseTypes')
 end)
 
+-- NUI callback to close the UI
 RegisterNUICallback("closeUI", function(_, cb)
     SetNuiFocus(false, false)
     cb({})
 end)
 
+-- NUI callback when form is submitted
 RegisterNUICallback("submitForm", function(data, cb)
     if data and data.playerId and data.licenseType and data.action then
         TriggerServerEvent("rps_licensemanager:updateLicense", data.playerId, data.licenseType, data.action)
@@ -41,7 +40,7 @@ RegisterNUICallback("submitForm", function(data, cb)
     cb({})
 end)
 
--- Handling the server response to populate license types
+-- Receive and set license types in UI
 RegisterNetEvent("rps_licensemanager:setLicenseTypes", function(licenseTypes)
     SendNUIMessage({
         action = "setLicenseTypes",

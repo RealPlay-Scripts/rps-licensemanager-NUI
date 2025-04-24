@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'unscalable'
 description 'UJ License Manager - NUI UI to grant/revoke licenses'
-version '1.0'
+version '1.1'
 
 lua54 'yes'
 
