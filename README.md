@@ -2,22 +2,25 @@
 
 ## Description
 
-**RealPlay-Scripts License Manager** is a powerful and easy-to-use FiveM script designed for the **QBCore** or **Qbox** Framework. It provides law enforcement officers and administrators the ability to manage player licenses directly via a modern UI interface and intuitive command.
+**RealPlay-Scripts License Manager** is a powerful and easy-to-use FiveM script designed for the **QBCore** or **Qbox** Framework. It provides law enforcement officers, specific job roles, and administrators the ability to manage player licenses directly via a modern UI interface and intuitive command system.
 
-Whether you're running a roleplay server or a law enforcement-focused community, this tool makes managing licenses simple and efficient.
+Whether you're running a roleplay server or a law enforcement-focused community, this tool makes managing licenses simple and efficient—with full support for job- and license-specific permission levels.
 
 ---
 
 ## 🚀 Key Features
 
 - ✅ **Grant and Revoke Licenses**  
-  Use the interactive UI or simple commands to manage licenses like `driver`, `weapon`, or `hunting`.
+  Use the interactive UI or simple commands to manage licenses like `driver`, `weapon`, `hunting`, and more.
 
-- 🔐 **Permission-Based Access**  
-  Only players with the **police job (grade 4+)** or those in the **admin group** can open and use the license manager.
+- 🔐 **Configurable Permissions**  
+  Job-based license permissions are fully controlled through `config.lua`, allowing you to define which jobs and grades can grant/revoke specific licenses.
+
+- 👮‍♂️ **Admin Override**  
+  Admins automatically have full access to manage any license, bypassing job restrictions.
 
 - 🧠 **Smart UI Access**  
-  The `/managelicense` command checks job and permissions before opening the NUI interface.
+  The `/managelicense` command checks job, grade, and permissions from the config before opening the NUI interface.
 
 - 💾 **Database Integration**  
   License changes are saved to the database and reflected in real-time using metadata updates.
@@ -26,57 +29,30 @@ Whether you're running a roleplay server or a law enforcement-focused community,
   Leverages `ox_lib` to send professional, non-intrusive alerts and messages.
 
 - 🛠️ **Customizable License Types**  
-  Driver, Weapon, Hunting, and more—fully customizable to match your server's needs.
+  Driver, Weapon, Hunting, and more—fully customizable via `config.lua` to match your server's needs.
 
 - 🔄 **Radial Menu Integration**  
-  Allows for opening the License Manager interface through a radial menu, giving users more flexibility.
+  Optional radial menu access to the License Manager UI for roleplay immersion.
 
 ---
 
 ## 🧩 How It Works
 
-- Players with the **police job (grade ≥ 4)** or in the **admin permission group** can use the `/managelicense` command.
-- A NUI interface opens, allowing the user to choose:
-  - Player ID
-  - License Type
-  - Action (Grant or Revoke)
-- The script sends data to the server which:
-  - Verifies permissions again for security
-  - Updates the license metadata
-  - Saves changes to the database
-- Players are notified of actions via `ox_lib`.
+1. Players with the correct **job/grade** (defined in config) or those in the **admin group** use the `/managelicense` command or radial menu.
+2. The NUI UI opens, letting them:
+   - Enter **Player ID**
+   - Select **License Type**
+   - Choose **Action** (Grant or Revoke)
+3. Data is sent to the server which:
+   - Checks config-defined permissions for that license
+   - Applies the action to the target player
+   - Updates metadata and saves to the database
+4. Both users receive confirmation via `ox_lib` notifications.
 
 ---
 
-## 🔄 Radial Menu Integration:
 
-If you want to open the License Manager UI via the **radial menu** instead of using the command, you can integrate it as follows:
+🔄 Scrips Documentation
 
-1. **Ensure Radial Menu Support**:  
-   You must have a radial menu system already set up in your server. This is typically handled through a custom script or a community resource like `qb-radialmenu`.
+- [Documentation](https://realplay-scripts-1.gitbook.io/realplay-scripts-documentation/free-scripts/rps-licensemanager-nui) 
 
-2. **Add a Custom Option**:  
-   Add the following client-side code to bind the radial menu button to open the UJ License Manager UI:
-
-   ```lua
-   -- Radial Menu Integration
-   {
-        id = 'license_manager',
-        icon = 'id-card',
-        label = 'License Manager',
-        type = 'client',
-        event = 'uj_licensemanager:openUI',
-   }, ```
-
-
-## 📦 Requirements
-
-- [QBCore Framework](https://github.com/qbcore-framework/qb-core) **or** [Qbox Framework](https://github.com/Qbox-project)
-- [oxmysql](https://github.com/overextended/oxmysql)
-- [ox_lib](https://github.com/overextended/ox_lib)
-
-> ⚠️ **Important:** Make sure `ox_lib` is started **before** this resource in your `server.cfg`:
-```cfg
-ensure ox_lib
-ensure qb-core / qbox
-ensure uj-licensemanager
